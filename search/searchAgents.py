@@ -278,7 +278,7 @@ class CornersProblem(search.SearchProblem):
 
         self.costFn = lambda x : 1
         self.startState = self.getStartState()
-        self.goal = ((1, 1), (True, True, True, True))
+        self.goal = (True, True, True, True)
 
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
@@ -286,7 +286,7 @@ class CornersProblem(search.SearchProblem):
 
     def isGoalState(self, state):
         "Returns whether this search state is a goal state of the problem"
-        return state == self.goal
+        return state[1] == self.goal
 
     def getSuccessors(self, state):
         """
