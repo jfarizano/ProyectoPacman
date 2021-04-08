@@ -277,7 +277,8 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # Number of search nodes expanded
 
         self.costFn = lambda x : 1
-        self.startingState = self.getStartState()
+        self.startState = self.getStartState()
+        self.goal = ((1, 1), (True, True, True, True))
 
     def getStartState(self):
         "Returns the start state (in your state space, not the full Pacman state space)"
@@ -285,7 +286,7 @@ class CornersProblem(search.SearchProblem):
 
     def isGoalState(self, state):
         "Returns whether this search state is a goal state of the problem"
-        return state[1] == (True, True, True, True)
+        return state == self.goal
 
     def getSuccessors(self, state):
         """
@@ -305,8 +306,18 @@ class CornersProblem(search.SearchProblem):
             dx, dy = Actions.directionToVector(action)
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
-                map(lambda corner : True if corner == (nextx, nexty) else corner, state[1])
-                nextState = ((nextx, nexty), state[1])
+                cornersState = state[1]
+                if (nextx, nexty) == self.corners[0]:
+                    nextCornersState = (True, cornersState[1], cornersState[2], cornersState[3])
+                elif (nextx, nexty) == self.corners[1]:
+                    nextCornersState = (cornersState[0], True, cornersState[2], cornersState[3])
+                elif (nextx, nexty) == self.corners[2]:
+                    nextCornersState = (cornersState[0], cornersState[1], True, cornersState[3])
+                elif (nextx, nexty) == self.corners[3]:
+                    nextCornersState = (cornersState[0], cornersState[1], cornersState[2], True)
+                else:
+                    nextCornersState = cornersState
+                nextState = ((nextx, nexty), nextCornersState)
                 cost = self.costFn(nextState)
                 successors.append( ( nextState, action, cost) )
 
