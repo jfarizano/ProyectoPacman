@@ -35,6 +35,7 @@ import util
 import time
 import search
 import searchAgents
+from itertools import permutations
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -354,25 +355,29 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
+    if problem.isGoalState(state):
+        return 0
+
     actualPos = state[0]
     cornersState = state[1]
     
     unvisitedCorners = [x for x in corners if not cornersState[corners.index(x)]]
-
-    h = 0
-    iPos = actualPos
     manDist = lambda x,y : abs(x[0] - y[0]) + abs(x[1] - y[1])
 
-    while(len(unvisitedCorners) > 0):
-        # Initial nearest corner to iPos
-        min = unvisitedCorners[0]
-        dMin = manDist(iPos, min)
-        for i in range(1, len(unvisitedCorners)):
-            if manDist(iPos, unvisitedCorners[i]) < dMin:
-                min = unvisitedCorners[i]
-                dMin = manDist(iPos, min)
-        h = h + dMin
-        unvisitedCorners.remove(min)
+    test = list(permutations(unvisitedCorners))
+    xd = []
+    xd2 = []
+
+    for i in range(len(test)):
+        xd.append([actualPos] + list(test[i]))
+    
+    for x in xd:
+        a = 0
+        for i in range(1, len(x)):
+            a = a + manDist(x[i - 1], x[i])
+        xd2.append(a)
+
+    h = min(xd2)
     
     return h
 
