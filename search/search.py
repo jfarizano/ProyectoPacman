@@ -67,7 +67,7 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s,s,w,s,w,w,s,w]
 
-def search(problem, fringe):
+def search(problem, fringe, h):
     initial_state = problem.getStartState()
     initial_actions = []
     initial_candidate = (initial_state, initial_actions)
@@ -84,6 +84,13 @@ def search(problem, fringe):
             candidate_successors = filter(lambda x: x[0] not in closed_set, candidate_successors)
             candidate_successors = map(lambda x: (x[0], actions + [x[1]]), candidate_successors)
             for candidate in candidate_successors:
+                print("Actual")
+                print(state)
+                print(h(state, problem))
+                print("Candidato")
+                print(candidate[0])
+                print(h(candidate[0], problem))
+                assert(h(state, problem) <= 1 + h(candidate[0], problem))     
                 fringe.push(candidate)
 
 def depthFirstSearch(problem):
@@ -124,7 +131,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "Search the node that has the lowest combined cost and heuristic first."
     g = lambda x : problem.getCostOfActions(x[1])
     f = lambda x : g(x) + heuristic(x[0], problem)
-    return search(problem, util.PriorityQueueWithFunction(f))
+    return search(problem, util.PriorityQueueWithFunction(f), heuristic)
 
 # Abbreviations
 bfs = breadthFirstSearch
