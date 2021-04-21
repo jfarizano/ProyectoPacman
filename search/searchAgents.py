@@ -364,20 +364,19 @@ def cornersHeuristic(state, problem):
     unvisitedCorners = [x for x in corners if not cornersState[corners.index(x)]]
     manDist = lambda x,y : abs(x[0] - y[0]) + abs(x[1] - y[1])
 
-    test = list(permutations(unvisitedCorners))
-    xd = []
-    xd2 = []
-
-    for i in range(len(test)):
-        xd.append([actualPos] + list(test[i]))
     
-    for x in xd:
-        a = 0
-        for i in range(1, len(x)):
-            a = a + manDist(x[i - 1], x[i])
-        xd2.append(a)
+    perms = list(permutations(unvisitedCorners))
+    perms = map(lambda x: [actualPos] + list(x), perms)
 
-    h = min(xd2)
+    costs = []
+    
+    for perm in perms:
+        cost = 0
+        for i in range(1, len(perm)):
+            cost += manDist(perm[i - 1], perm[i])
+        costs.append(cost)
+
+    h = min(costs)
     
     return h
 
