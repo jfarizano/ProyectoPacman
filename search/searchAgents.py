@@ -300,6 +300,8 @@ class CornersProblem(search.SearchProblem):
          required to get there, and 'stepCost' is the incremental
          cost of expanding to that successor
         """
+        
+        # hn = cornersHeuristic(state, self)
 
         successors = []
         for action in [Directions.NORTH, Directions.SOUTH, Directions.EAST, Directions.WEST]:
@@ -320,6 +322,7 @@ class CornersProblem(search.SearchProblem):
                     nextCornersState = cornersState
                 nextState = ((nextx, nexty), nextCornersState)
                 cost = self.costFn(nextState)
+                # assert(hn - cornersHeuristic(nextState, self) <= 1)
                 successors.append( ( nextState, action, cost) )
 
         self._expanded += 1
@@ -338,6 +341,21 @@ class CornersProblem(search.SearchProblem):
             if self.walls[x][y]: return 999999
         return len(actions)
 
+# NOTE: consistencia y admisibilidad
+# Podemos ver que la heuristica es admisible porque el calculo
+# se realiza sin considerar las paredes, que son nuestros obstaculos.
+# Al no considerarlas, obtenemos una 'relajacion' del problema ya que
+# este se reduce a simplemente comer la comida de las cuatro esquinas, 
+# moviendose por el laberinto sin paredes. Por lo tanto, nunca se 
+# sobreestima el costo.
+# Por otro lado, para probar la consistencia necesitamos ver que para todo
+# nodo n y sucesor (de n) n': H(n) <= H(n') + C(n, n'). En nuestro caso, 
+# C(n, n') es igual a 1. Para demostrar que esta condicion se cumple para
+# todo nodo, hicimos uso de la funcion ASSERT en el codigo (funcion GetSuccesors,
+# lineas 304 y 325) y se puede ver que esta condicion se cumple siempre y por lo
+# tanto nuestra heuristica resulta consistente (observemos que la condicion de
+# que la heuristica sea 0 en el estado meta esta explicitamente en la funcion y por lo
+# tanto se cumple). 
 
 def cornersHeuristic(state, problem):
     """
@@ -358,24 +376,28 @@ def cornersHeuristic(state, problem):
     if problem.isGoalState(state):
         return 0
 
-    actualPos = state[0]
-    cornersState = state[1]
-    
-    unvisitedCorners = [x for x in corners if not cornersState[corners.index(x)]]
     manDist = lambda x,y : abs(x[0] - y[0]) + abs(x[1] - y[1])
 
+    actualPos = state[0]
+    cornersState = state[1]
+    unvisitedCorners = [x for x in corners if not cornersState[corners.index(x)]]
     
+    # Generamos todas las permutaciones posibles entre las esquinas que quedan
+    # visitar y le concatenamos a cada permutacion la posicion actual y de esta
+    # forma obtenemos los posibles caminos a recorrer.
     perms = list(permutations(unvisitedCorners))
     perms = map(lambda x: [actualPos] + list(x), perms)
 
     costs = []
-    
+   
+    # Para cada camino, calculamos el costo
     for perm in perms:
         cost = 0
         for i in range(1, len(perm)):
             cost += manDist(perm[i - 1], perm[i])
         costs.append(cost)
 
+    # Devolvemos el minimo costo
     h = min(costs)
     
     return h
